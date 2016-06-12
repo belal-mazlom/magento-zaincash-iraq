@@ -76,10 +76,11 @@ class Shopgo_ZainIraq_PayController extends Mage_Core_Controller_Front_Action
 
         $token = JWT::encode($params, $key);
 
+        $urlObj = parse_url(Mage::getBaseUrl());
 
         $fields = array(
             'token' => urlencode($token),
-            'serviceType' => urlencode('online store'),
+            'serviceType' => urlencode($urlObj['host']),
             'msisdn' => urlencode($mssidn)
         );
 
@@ -104,7 +105,6 @@ class Shopgo_ZainIraq_PayController extends Mage_Core_Controller_Front_Action
         //execute post
         $result = curl_exec($ch);
 
-        // ...process $content now
         if (FALSE === $result) {
             echo curl_error($ch);
             curl_close($ch);
