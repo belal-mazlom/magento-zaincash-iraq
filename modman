@@ -1,0 +1,5 @@
+app/code/community/Shopgo/ZainIraq/                                 app/code/community/Shopgo/ZainIraq/
+skin/frontend/default/default/images/zainiraq/logo-en.png           skin/frontend/default/default/images/zainiraq/logo-en.png
+app/design/frontend/base/default/template/shopgo/ZainIraq/          app/design/frontend/base/default/template/shopgo/ZainIraq/
+app/design/frontend/base/default/layout/shopgo/zainiraq.xml         app/design/frontend/base/default/layout/shopgo/zainiraq.xml
+app/etc/modules/Shopgo_ZainIraq.xml                                 app/etc/modules/Shopgo_ZainIraq.xml

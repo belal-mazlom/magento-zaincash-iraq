@@ -1,0 +1,15 @@
+{
+    "name": "shopgo/zain-iraq-payment",
+    "type": "magento-module",
+    "license": "OSL-3.0",
+    "description": "Zain Cash payemnt in Iraq",
+    "require": {
+        "magento-hackathon/magento-composer-installer": "*"
+    },
+    "authors": [
+        {
+            "name": "Shopgo Team",
+            "email": "support@shopgo.me"
+        }
+    ]
+}

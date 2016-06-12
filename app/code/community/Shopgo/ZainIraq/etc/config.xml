@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <modules>
+        <Shopgo_ZainIraq>
+            <version>1.0.0</version>
+        </Shopgo_ZainIraq>
+    </modules>
+
+    <global>
+        <blocks>
+            <zainiraq>
+                <class>Shopgo_ZainIraq_Block</class>
+            </zainiraq>
+        </blocks>
+        <helpers>
+            <zainiraq>
+                <class>Shopgo_ZainIraq_Helper</class>
+            </zainiraq>
+        </helpers>
+        <models>
+            <zainiraq>
+                <class>Shopgo_ZainIraq_Model</class>
+            </zainiraq>
+        </models>
+    </global>
+
+    <default>
+        <payment>
+            <zainiraq>
+                <model>zainiraq/standard</model>
+                <active>1</active>
+                <order_status>pending</order_status>
+                <title>Zain Iraq Payment</title>
+                <payment_action>sale</payment_action>
+                <mssidn_live>0</mssidn_live>
+                <secret_key_live>0</secret_key_live>
+                <mssidn_demo>0</mssidn_demo>
+                <secret_key_demo>0</secret_key_demo>
+                <payment_mode>0</payment_mode>
+            </zainiraq>
+        </payment>
+    </default>
+
+    <frontend>
+        <routers>
+            <zainiraq>
+                <use>standard</use>
+                <args>
+                    <module>Shopgo_ZainIraq</module>
+                    <frontName>zainiraq</frontName>
+                </args>
+            </zainiraq>
+        </routers>
+    </frontend>
+</config>

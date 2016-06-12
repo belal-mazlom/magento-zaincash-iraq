@@ -1,0 +1,45 @@
+<?php
+// Retrieve order
+$gatewayParams = $this->getData('gatewayParams');
+$gatewayUrl    = $this->getData('gatewayUrl');
+?>
+
+<div class="wrapper zainiraq-container">
+        <div class="zainiraq-logo">
+            <span style="font-weight:bold;font-size:16px">Online Payment</span> <span>Service</span>
+        </div>
+        <p class="title"><?php echo $this->__('Redirecting to payment gateway ...') ?></p>
+    <form name="zainiraqpaymentform" id="zainiraqpaymentform" method="post" action="<?php echo $gatewayUrl; ?>">
+        <!-- general parameters -->
+        <?php foreach ($gatewayParams as $k => $v): ?>
+            <input type="hidden" name="<?php echo $k ?>" value="<?php echo $v ?>">
+        <?php endforeach; ?>
+    </form>
+</div>
+<script type="text/javascript">
+    (function () {
+        setTimeout(function () {
+            document.zainiraqpaymentform.submit();
+        }, 4000);
+    })();
+</script>
+<style type="text/css">
+    #payfortpaymentform {
+        display:none;
+    }
+    .zainiraq-container{
+        text-align: center;
+    }
+    .zainiraq-logo{
+        background:url(<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_SKIN) . 'frontend/default/default/images/zainiraq/logo-en.png' ?>) #7db6d9 no-repeat;
+        width: 327px;
+        height: 85px;
+        margin: 0 auto;
+        padding-left: 121px;
+        padding-top: 33px;
+        border-radius: 14px;
+    }
+    .zainiraq-container .title {
+        margin-top:14px;
+    }
+</style>
