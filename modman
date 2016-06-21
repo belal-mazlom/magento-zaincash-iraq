@@ -3,3 +3,4 @@ skin/frontend/default/default/images/zainiraq/logo-en.png           skin/fronten
 app/design/frontend/base/default/template/shopgo/zainiraq/          app/design/frontend/base/default/template/shopgo/zainiraq/
 app/design/frontend/base/default/layout/shopgo/zainiraq.xml         app/design/frontend/base/default/layout/shopgo/zainiraq.xml
 app/etc/modules/Shopgo_ZainIraq.xml                                 app/etc/modules/Shopgo_ZainIraq.xml
+lib/Firebase/	  						    lib/Firebase/

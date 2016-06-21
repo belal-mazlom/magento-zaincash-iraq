@@ -30,7 +30,7 @@
                 <model>zainiraq/standard</model>
                 <active>1</active>
                 <order_status>pending</order_status>
-                <title>Zain Iraq Payment</title>
+                <title>Zain Cash (Iraq)</title>
                 <payment_action>sale</payment_action>
                 <mssidn_live>0</mssidn_live>
                 <secret_key_live>0</secret_key_live>
@@ -40,6 +40,44 @@
             </zainiraq>
         </payment>
     </default>
+
+    <stores>
+        <ar>
+            <payment>
+                <zainiraq>
+                    <title>زين كاش (العراق)</title>
+                </zainiraq>
+            </payment>
+        </ar>
+        <ae>
+            <payment>
+                <zainiraq>
+                    <title>زين كاش (العراق)</title>
+                </zainiraq>
+            </payment>
+        </ae>
+        <sa>
+            <payment>
+                <zainiraq>
+                    <title>زين كاش (العراق)</title>
+                </zainiraq>
+            </payment>
+        </sa>
+        <jo>
+            <payment>
+                <zainiraq>
+                    <title>زين كاش (العراق)</title>
+                </zainiraq>
+            </payment>
+        </jo>
+        <iq>
+            <payment>
+                <zainiraq>
+                    <title>زين كاش (العراق)</title>
+                </zainiraq>
+            </payment>
+        </iq>
+    </stores>
 
     <frontend>
         <routers>
