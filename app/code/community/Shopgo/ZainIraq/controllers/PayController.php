@@ -17,8 +17,8 @@ class Shopgo_ZainIraq_PayController extends Mage_Core_Controller_Front_Action
     const DEMO_URL = 'https://test.zaincash.iq/';
 
     const CHECK_PAYMENT_STATUS_URL = 'checkPaymentStatus';
-    const REDIRECT_URL = 'paywithredirect';
-    const GENERATE_ID_URL = 'generateuniqueid';
+    const REDIRECT_URL = 'transaction/pay';
+    const GENERATE_ID_URL = 'transaction/init';
 
     /**
      * Get singleton of Checkout Session Model
@@ -37,19 +37,19 @@ class Shopgo_ZainIraq_PayController extends Mage_Core_Controller_Front_Action
 
     public function redirectAction()
     {
-        $paymentMode = Mage::getStoreConfig('payment/zainiraq/payment_mode');
+        $isDemoMode = Mage::getStoreConfig('payment/zainiraq/account_mode');
 
-        if ($paymentMode == 1) {
-            $gatewayUrl = self::LIVE_URL.self::REDIRECT_URL;
-            $mssidn = Mage::getStoreConfig('payment/zainiraq/mssidn_live');
-            $secretKey = Mage::getStoreConfig('payment/zainiraq/secret_key_live');
-            $generateIdURL = self::LIVE_URL.self::GENERATE_ID_URL;
+        if ($isDemoMode == 1) {
+            $gatewayUrl = self::DEMO_URL . self::REDIRECT_URL;
+            $generateIdURL = self::DEMO_URL . self::GENERATE_ID_URL;
         } else {
-            $gatewayUrl = self::DEMO_URL.self::REDIRECT_URL;
-            $mssidn = Mage::getStoreConfig('payment/zainiraq/mssidn_demo');
-            $secretKey = Mage::getStoreConfig('payment/zainiraq/secret_key_demo');
-            $generateIdURL = self::DEMO_URL.self::GENERATE_ID_URL;
+            $gatewayUrl = self::LIVE_URL . self::REDIRECT_URL;
+            $generateIdURL = self::LIVE_URL . self::GENERATE_ID_URL;
         }
+
+        $mssidn = Mage::getStoreConfig('payment/zainiraq/mssidn');
+        $secretKey = Mage::getStoreConfig('payment/zainiraq/secret_key');
+        $merchantId = Mage::getStoreConfig('payment/zainiraq/merchant_id');
 
         $session = $this->getCheckout();
         $session->setMigsQuoteId($session->getQuoteId());
@@ -67,21 +67,24 @@ class Shopgo_ZainIraq_PayController extends Mage_Core_Controller_Front_Action
         $orderAmount = ceil($orderAmount);
 
         $key = $secretKey;
+        $urlObj = parse_url(Mage::getBaseUrl());
+
         $params = array(
-            "msisdn" => $mssidn,
-            "amount" => $orderAmount,
+            'msisdn' => intval($mssidn),
+            'amount' => $orderAmount,
+            'serviceType' => urlencode($urlObj['host']),
+            'orderId' => $session->getLastRealOrderId(),
+            'redirectUrl' => Mage::getBaseUrl() . 'zainiraq/pay/response',
             'iat' => time(),
-            'exp' => strtotime('-4h')
+            'exp' => time() + 3600
         );
 
         $token = JWT::encode($params, $key);
 
-        $urlObj = parse_url(Mage::getBaseUrl());
-
         $fields = array(
             'token' => urlencode($token),
-            'serviceType' => urlencode($urlObj['host']),
-            'msisdn' => urlencode($mssidn)
+            'merchantId' => urlencode($merchantId),
+            'lang' => 'ar',
         );
 
         $fields_string = '';
@@ -106,28 +109,26 @@ class Shopgo_ZainIraq_PayController extends Mage_Core_Controller_Front_Action
         $result = curl_exec($ch);
 
         if (FALSE === $result) {
-            echo curl_error($ch);
             curl_close($ch);
             //redirect to failure url
             $this->_redirect('*/*/failure');
         } else {
             curl_close($ch);
             $body = json_decode($result);
-
             //Prepare order
             $order->addStatusToHistory($order->getStatus(), __('Customer is redirected to Zain Iraq payment.'));
             $order->save();
 
             $session->unsQuoteId();
 
-            //Show for in response
-            $gatewayParams = array(
-                'id' => $body->id,
-                'lang' => 'en',
-                'orderid' => $session->getLastRealOrderId(),
-                'onsuccess' => Mage::getBaseUrl().'/zainiraq/pay/response',
-                'onfailure' => Mage::getBaseUrl().'/zainiraq/pay/response'
-            );
+            if (isset($body->id)) {
+                //Show for in response
+                $gatewayParams = array(
+                    'id' => $body->id
+                );
+            } else {
+                $gatewayParams = array();
+            }
 
             $block = $this->getLayout()->createBlock(
                 'Mage_Core_Block_Template', 'zainiraq_block_process', array('template' => 'shopgo/zainiraq/redirect.phtml')
@@ -152,35 +153,37 @@ class Shopgo_ZainIraq_PayController extends Mage_Core_Controller_Front_Action
         }
 
         $token = $this->getRequest()->getParam('token');
-        $responseObject = JWT::decode($token, $secretKey, array('HS256'));
+        if (strlen($token) > 0) {
+            $responseObject = JWT::decode($token, $secretKey, array('HS256'));
 
-        try {
+            try {
+                if ($responseObject) {
+                    $orderId = $responseObject->orderid;
+                    if ($responseObject->status == "success") {
+                        $order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
+                        $order->setState(Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW, true, 'Payment Success.');
+                        $order->save();
+                        $_payment = $order->getPayment();
+                        $_payment->setTransactionId($responseObject->id);
+                        $_payment->setParentTransactionId($responseObject->id);
+                        $_payment
+                            ->setShouldCloseParentTransaction(Mage_Sales_Model_Order::STATE_COMPLETE)
+                            ->setIsTransactionClosed(0);
+                        $_payment->save();
 
-            if ($responseObject) {
-                $orderId = $responseObject->orderid;
-                if ($responseObject->status == "success") {
-                    $order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
-                    $order->setState(Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW, true, 'Payment Success.');
-                    $order->save();
-                    $_payment = $order->getPayment();
-                    $_payment->setTransactionId($responseObject->id);
-                    $_payment->setParentTransactionId($responseObject->id);
-                    $_payment
-                        ->setShouldCloseParentTransaction(Mage_Sales_Model_Order::STATE_COMPLETE)
-                        ->setIsTransactionClosed(0);
-                    $_payment->save();
-
-                    Mage::getSingleton('checkout/session')->unsQuoteId();
-                    Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/success', array('_secure' => false));
-                } else {
-                    //Failure
-                    Mage::getSingleton('checkout/session')->setErrorMessage($responseObject->msg);
-                    Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/failure', array('_secure' => false));
+                        Mage::getSingleton('checkout/session')->unsQuoteId();
+                        Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/success', array('_secure' => false));
+                    } else {
+                        //Failure
+                        Mage::getSingleton('checkout/session')->setErrorMessage($responseObject->msg);
+                        Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/failure', array('_secure' => false));
+                    }
                 }
+            } catch (Exception $e) {
+                Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/failure', array('_secure' => false));
             }
-        } catch (Exception $e) {
+        }else{
             Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/failure', array('_secure' => false));
         }
-
     }
 }

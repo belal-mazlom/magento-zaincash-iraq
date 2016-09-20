@@ -9,7 +9,7 @@ $gatewayUrl    = $this->getData('gatewayUrl');
             <span style="font-weight:bold;font-size:16px">Online Payment</span> <span>Service</span>
         </div>
         <p class="title"><?php echo $this->__('Redirecting to payment gateway ...') ?></p>
-    <form name="zainiraqpaymentform" id="zainiraqpaymentform" method="post" action="<?php echo $gatewayUrl; ?>">
+    <form name="zainiraqpaymentform" id="zainiraqpaymentform" method="get" action="<?php echo $gatewayUrl; ?>">
         <!-- general parameters -->
         <?php foreach ($gatewayParams as $k => $v): ?>
             <input type="hidden" name="<?php echo $k ?>" value="<?php echo $v ?>">
@@ -18,9 +18,15 @@ $gatewayUrl    = $this->getData('gatewayUrl');
 </div>
 <script type="text/javascript">
     (function () {
+        <?php if(count($gatewayParams) > 0): ?>
         setTimeout(function () {
             document.zainiraqpaymentform.submit();
         }, 4000);
+        <?php else:?>
+        var $title = jQuery(".zainiraq-container .title");
+        $title.css('color', '#CC0000');
+        $title.html("Can't connect to Zain cash payment");
+        <?php endif;?>
     })();
 </script>
 <style type="text/css">
