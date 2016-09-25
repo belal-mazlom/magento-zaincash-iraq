@@ -28,7 +28,7 @@
         <payment>
             <zainiraq>
                 <model>zainiraq/standard</model>
-                <active>1</active>
+                <active>0</active>
                 <order_status>pending</order_status>
                 <title>Zain Iraq Payment</title>
                 <mssidn></mssidn>
