@@ -144,15 +144,10 @@ class Shopgo_ZainIraq_PayController extends Mage_Core_Controller_Front_Action
 
     public function responseAction()
     {
-        $paymentMode = Mage::getStoreConfig('payment/zainiraq/payment_mode');
-
-        if ($paymentMode == 1) {
-            $secretKey = Mage::getStoreConfig('payment/zainiraq/secret_key_live');
-        } else {
-            $secretKey = Mage::getStoreConfig('payment/zainiraq/secret_key_demo');
-        }
+        $secretKey = Mage::getStoreConfig('payment/zainiraq/secret_key');
 
         $token = $this->getRequest()->getParam('token');
+
         if (strlen($token) > 0) {
             $responseObject = JWT::decode($token, $secretKey, array('HS256'));
 
